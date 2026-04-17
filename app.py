@@ -1,11 +1,14 @@
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
+from pathlib import Path
 
 app = Dash()
 
+BASE_DIR = Path(__file__).resolve().parent
+
 df = pd.read_csv(
-    "data/output.csv",
+    BASE_DIR / "data" / "output.csv",
     header=None,
     names=["sales", "date", "region"],
 )
@@ -21,7 +24,7 @@ fig = px.line(
 )
 
 app.layout = html.Div(children=[
-    html.H1(children='Sales of each region per day'),
+    html.H1(id="header", children='Sales of each region per day'),
 
     html.Div(children='''
     This graph shows the sales of each region per day for the product "pink morsel".
@@ -30,7 +33,7 @@ app.layout = html.Div(children=[
     html.Form([
         html.Label("Select a region:"),
         dcc.RadioItems(
-            id='region-radio',
+            id="region_picker",
             options=[
                 {'label': 'North', 'value': 'north'},
                 {'label': 'South', 'value': 'south'},
@@ -43,16 +46,15 @@ app.layout = html.Div(children=[
     ]),
 
     dcc.Graph(
-        id='example-graph',
+        id='visualisation',
         figure=fig
     )
 ])
 
 
 @app.callback(
-    Output('example-graph', 'figure'),
-    Input('region-radio', 'value')
-)
+    Output('visualisation', 'figure'),
+    Input('region_picker', 'value'))
 def update_graph(selected_region):
     chart_data = df if selected_region == 'all' else df[df['region'] == selected_region]
     title = 'Sales by region' if selected_region == 'all' else f"Sales in {selected_region.title()}"
