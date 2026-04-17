@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc
+from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
 
@@ -27,11 +27,43 @@ app.layout = html.Div(children=[
     This graph shows the sales of each region per day for the product "pink morsel".
     '''),
 
+    html.Form([
+        html.Label("Select a region:"),
+        dcc.RadioItems(
+            id='region-radio',
+            options=[
+                {'label': 'North', 'value': 'north'},
+                {'label': 'South', 'value': 'south'},
+                {'label': 'East', 'value': 'east'},
+                {'label': 'West', 'value': 'west'},
+                {'label': 'All regions', 'value': 'all'},
+            ],
+            value='all'
+        )
+    ]),
+
     dcc.Graph(
         id='example-graph',
         figure=fig
     )
 ])
+
+
+@app.callback(
+    Output('example-graph', 'figure'),
+    Input('region-radio', 'value')
+)
+def update_graph(selected_region):
+    chart_data = df if selected_region == 'all' else df[df['region'] == selected_region]
+    title = 'Sales by region' if selected_region == 'all' else f"Sales in {selected_region.title()}"
+
+    return px.line(
+        chart_data,
+        x='date',
+        y='sales',
+        color='region',
+        title=title,
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
