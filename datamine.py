@@ -81,5 +81,4 @@ def main():
     result = format_as_file(dataArr)
     write_result_to_output(result, "data/output.csv")
 
-if __name__ == "__main__":
-    main()
+main()
